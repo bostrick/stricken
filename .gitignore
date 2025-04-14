@@ -1,0 +1,7 @@
+.direnv
+.envrc
+database.db
+
+*.pyc
+*.egg-info
+*.sw?

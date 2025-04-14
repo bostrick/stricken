@@ -1,0 +1,1 @@
+from totav.stricken.foo import hello
