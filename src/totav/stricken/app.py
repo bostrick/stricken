@@ -3,16 +3,18 @@ from typing import Union, Annotated
 
 from fastapi import FastAPI, Depends
 from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Session, select
 from pydantic import BaseModel
 
 from totav.stricken.engine import create_db_and_tables, SessionDep
-from totav.stricken.models import Organization
+from totav.stricken.routes import router
+from totav.stricken.auth import router as auth_router
 
 #logging.basicConfig(level=logging.INFO)
 
 
 app = FastAPI()
+app.include_router(auth_router)
+app.include_router(router)
 
 #SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -34,37 +36,6 @@ def read_item(item_id: int, q: Union[str, None] = None):
 def update_item(item_id: int, item: Item):
     return {"item_name": item.name, "item_id": item_id}
 
-@app.post("/org/")
-def create_organization(org: Organization, session: SessionDep) -> Organization:
-    session.add(org)
-    session.commit()
-    session.refresh(org)
-    return org
-
-@app.get("/org/")
-def read_organization(
-    session: SessionDep,
-    offset: int = 0,
-    limit: Annotated[int, Query(le=100)] = 100,
-) -> list[Organization]:
-    orgs = session.exec(select(Organization).offset(offset).limit(limit)).all()
-    return orgs
-
-@app.get("/org/{org_id}")
-def read_hero(org_id: str, session: SessionDep) -> Organization:
-    org = session.get(Organization, org_id)
-    if not org:
-        raise HTTPException(status_code=404, detail="Org not found")
-    return org
-
-@app.delete("/orgs/{org_id}")
-def delete_org(org_id: int, session: SessionDep):
-    org = session.get(Organization, org_id)
-    if not org:
-        raise HTTPException(status_code=404, detail="org not found")
-    session.delete(org)
-    session.commit()
-    return {"ok": True}
 
 
 

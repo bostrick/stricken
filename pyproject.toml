@@ -27,6 +27,8 @@ classifiers = [
 dependencies = [
     "fastcgi[standard]",
     "sqlmodel",
+    "pyjwt",
+    "passlib",
 ]
 
 [project.urls]

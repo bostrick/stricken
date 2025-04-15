@@ -1,6 +1,6 @@
 .direnv
 .envrc
-database.db
+database.db*
 
 *.pyc
 *.egg-info
