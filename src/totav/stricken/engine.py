@@ -1,6 +1,7 @@
 from typing import Annotated
 import os
 import logging 
+from contextlib import contextmanager
 
 from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
@@ -21,3 +22,9 @@ def get_session():
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+@contextmanager
+def with_session():
+    session = Session(engine)
+    yield session
+    session.commit()

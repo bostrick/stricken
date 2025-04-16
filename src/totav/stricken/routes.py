@@ -1,4 +1,6 @@
-from typing import Annotated
+import logging
+import functools
+from typing import Annotated, Callable, Type
 
 from fastapi import HTTPException, Query
 from fastapi import APIRouter
@@ -6,9 +8,39 @@ from sqlmodel import select
 
 from totav.stricken.models import Organization
 from totav.stricken.models import Book
+from totav.stricken.models import get_model_registry
 from totav.stricken.engine import SessionDep
 
+
+LOG = logging.getLogger(__name__)
 router = APIRouter()
+
+def model_get_factory(model):
+    def f(obj_id: str, session: SessionDep):
+        obj = session.get(model, obj_id)
+        if not obj:
+            raise HTTPException(status_code=404, detail=f"{model} not found")
+        breakpoint()
+        return obj
+    return f
+
+
+class RouteBinder:
+
+    def __init__(self):
+        self.router = APIRouter()
+        self.registry = get_model_registry()
+
+    def bind_all(self):
+        for name, model in self.registry.items():
+            self.bind_model(name, model)
+        return self.router
+
+    def bind_model(self, name, model):
+        LOG.info(f"binding model {model}")
+        # default getter
+        #f : Callable[[str, SessionDep], Type(model)] = functools.partial(get_model, model)
+        self.router.get("/foo%s/{obj_id}" % name, response_model=model)(model_get_factory(model))
 
 # orgs
 

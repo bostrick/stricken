@@ -1,0 +1,6 @@
+---
+model_name: organization
+name: Some Org
+age: 10
+book_list:
+-  name: some book
